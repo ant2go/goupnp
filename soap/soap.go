@@ -25,8 +25,16 @@ type SOAPClient struct {
 }
 
 func NewSOAPClient(endpointURL url.URL) *SOAPClient {
+	timeout := time.Duration(3 * time.Second)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	return &SOAPClient{
 		EndpointURL: endpointURL,
+		HTTPClient: http.Client{
+			Timeout:   timeout,
+			Transport: tr,
+		},
 	}
 }
 
