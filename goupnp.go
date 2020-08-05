@@ -15,6 +15,7 @@
 package goupnp
 
 import (
+	"crypto/tls"
 	"encoding/xml"
 	"fmt"
 	"net/http"
@@ -125,13 +126,18 @@ func DeviceByURL(loc *url.URL) (*RootDevice, error) {
 
 func requestXml(url string, defaultSpace string, doc interface{}) error {
 	timeout := time.Duration(3 * time.Second)
-	client := http.Client{
-		Timeout: timeout,
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	resp, err := client.Get(url)
+	client := http.Client{
+		Timeout:   timeout,
+		Transport: tr,
+	}
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
+	resp, err := client.Do(req)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
